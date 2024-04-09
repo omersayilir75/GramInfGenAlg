@@ -1,0 +1,21 @@
+<component name="libraryTable">
+  <library name="antlr.antlr4.maven.plugin" type="repository">
+    <properties maven-id="org.antlr:antlr4-maven-plugin:4.13.1" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr4-maven-plugin/4.13.1/antlr4-maven-plugin-4.13.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/plexus/plexus-compiler-api/2.12.1/plexus-compiler-api-2.12.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr4/4.13.1/antlr4-4.13.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr4-runtime/4.13.1/antlr4-runtime-4.13.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr-runtime/3.5.3/antlr-runtime-3.5.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/antlr/ST4/4.3.4/ST4-4.3.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/abego/treelayout/org.abego.treelayout.core/1.0.3/org.abego.treelayout.core-1.0.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/ibm/icu/icu4j/72.1/icu4j-72.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/2.0.0/slf4j-api-2.0.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-simple/2.0.0/slf4j-simple-2.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

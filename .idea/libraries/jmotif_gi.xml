@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="jmotif-gi">
+    <ANNOTATIONS>
+      <root url="jar://$PROJECT_DIR$/lib/jmotif-gi.jar!/" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jmotif-gi.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
