@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class GramInf extends AbstractProblem {
+    private int sampleToInit = 0;
 
     public GramInf() {
         super(1, 4);
@@ -42,15 +43,14 @@ public class GramInf extends AbstractProblem {
     @Override
     public Solution newSolution() {
         Solution solution = new Solution(1, 4);
-
         try {
-            solution.setVariable(0,new GrammarRepresentation(
-                    grammarForFileInFolder("C:\\Users\\omer_\\Desktop\\gensamples\\positive\\desk\\generated\\for_run\\initpop")
+            solution.setVariable(0, new GrammarRepresentation(
+                    grammarForFileInFolder("C:\\Users\\omer_\\Desktop\\gensamples\\positive\\desk\\subset_initpop")
             ));
+            sampleToInit++;
         } catch (Exception ignored) {
 
         }
-
         return solution;
     }
 
@@ -66,7 +66,7 @@ public class GramInf extends AbstractProblem {
         AtomicInteger passedTruePositiveSamples = new AtomicInteger();
 
         try {
-            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\gensamples\\positive\\desk\\generated\\for_run\\testpos", passedTruePositiveSamples, totalTruePositiveSamples);
+            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\gensamples\\positive\\desk\\subset_parse\\subdir_5", passedTruePositiveSamples, totalTruePositiveSamples);
         } catch (RecognitionException e) {
             throw new RuntimeException(e);
         }
@@ -80,7 +80,7 @@ public class GramInf extends AbstractProblem {
         AtomicInteger passedTrueNegativeSamples = new AtomicInteger();
 
         try {
-            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\gensamples\\negative\\desk\\wordmutation\\output\\testneg", passedTrueNegativeSamples, totalTrueNegativeSamples);
+            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\gensamples\\negative\\desk\\wordmutation\\output\\subfolder1", passedTrueNegativeSamples, totalTrueNegativeSamples);
         } catch (RecognitionException e) {
             throw new RuntimeException(e);
         }
@@ -91,41 +91,39 @@ public class GramInf extends AbstractProblem {
 
         // Minimise average length productions
         AtomicInteger totalLength = new AtomicInteger();
-        grammarMap.forEach((r,c) -> {
+        grammarMap.forEach((r, c) -> {
             String[] words = r.split(" ");
             totalLength.addAndGet((words.length));
         });
-        double averageLength = ((double) totalLength.get()/grammarMap.size());
+        double averageLength = ((double) totalLength.get() / grammarMap.size());
         solution.setObjective(2, averageLength);
 
         // Minimise average number of productions
         solution.setObjective(3, grammarMap.size());
     }
 
-    private TreeMap<String,String> grammarForFileInFolder(String path) throws Exception {
+    private TreeMap<String, String> grammarForFileInFolder(String path) throws Exception {
         File dir = new File(path);
         File[] files = dir.listFiles();
 
         assert files != null;
-        File pickedFile = files[0];
+        File pickedFile = files[sampleToInit];
         String fileContents = new String(Files.readAllBytes(Paths.get(pickedFile.getAbsolutePath())));
 
         SAXRule r = SequiturFactory.runSequitur(fileContents);
         GrammarRules rules = r.toGrammarRulesData();
 
-        TreeMap<String,String> grammar = new TreeMap<>();
+        TreeMap<String, String> grammar = new TreeMap<>();
         rules.forEach(rule -> addToMap(rule, grammar));
-
-        pickedFile.delete();
         return grammar;
     }
 
-    private void addToMap(GrammarRuleRecord rule, TreeMap<String, String> map){
+    private void addToMap(GrammarRuleRecord rule, TreeMap<String, String> map) {
         String rulestr = rule.getRuleString();
         String[] parts = rulestr.split("\\s+");
         StringBuilder quotedRule = new StringBuilder();
         for (String part : parts) {
-            if(!part.matches("r\\d+")){
+            if (!part.matches("r\\d+")) {
                 quotedRule.append("'").append(part).append("' ");
             } else {
                 quotedRule.append(part).append(' ');
@@ -135,19 +133,21 @@ public class GramInf extends AbstractProblem {
     }
 
 
-    private String treeMapToAntlrString(TreeMap<String,String> map){
+    private String treeMapToAntlrString(TreeMap<String, String> map) {
         StringBuilder rulesAsString = new StringBuilder("grammar desk;\n");
 
-        map.forEach((name, content) -> rulesAsString.append(name).append(": ").append(content).append("\n"));
+        map.forEach((name, content) -> rulesAsString.append(name).append(": ").append(content).append(";\n"));
         rulesAsString.append(skipWhitespace);
         return rulesAsString.toString();
     }
 
-    private void parseSamples (String grammarText, String pathName, AtomicInteger passedSamples, AtomicInteger totalSamples) throws RecognitionException {
+    private void parseSamples(String grammarText, String pathName, AtomicInteger passedSamples, AtomicInteger totalSamples) throws RecognitionException {
         Grammar g = new Grammar(grammarText);
 
         try (Stream<Path> paths = Files.walk(Paths.get(pathName))) {
-            paths.parallel().forEach(p -> parseFile(p, g, passedSamples, totalSamples));
+            paths
+//                    .parallel()
+                    .forEach(p -> parseFile(p, g, passedSamples, totalSamples));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -163,9 +163,14 @@ public class GramInf extends AbstractProblem {
                 reader = new BufferedReader(new FileReader(programPath));
                 CharStream input = CharStreams.fromReader(reader);
                 LexerInterpreter lexEngine = g.createLexerInterpreter(input);
+                lexEngine.removeErrorListeners(); // prevent logging error listeners
                 CommonTokenStream tokens = new CommonTokenStream(lexEngine);
                 GrammarParserInterpreter parser = new GrammarParserInterpreter(g,
                         new ATNDeserializer().deserialize(ATNSerializer.getSerialized(g.getATN()).toArray()), tokens);
+                // prevent large error logs
+                parser.removeErrorListeners();
+                CustomErrorListener listener = new CustomErrorListener();
+                parser.addErrorListener(listener);
                 ParseTree t = parser.parse(g.rules.get("r0").index);
 
                 if (parser.getNumberOfSyntaxErrors() == 0) {
@@ -176,10 +181,10 @@ public class GramInf extends AbstractProblem {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                if (reader != null){
-                    try{
+                if (reader != null) {
+                    try {
                         reader.close();
-                    }catch (IOException e){
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
 
@@ -187,7 +192,6 @@ public class GramInf extends AbstractProblem {
 
             }
         }
-
     }
 
 }

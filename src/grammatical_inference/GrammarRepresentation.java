@@ -6,6 +6,8 @@ import java.util.TreeMap;
 
 public class GrammarRepresentation implements Variable {
 
+
+
     public TreeMap<String, String> getGrammar() {
         return grammar;
     }
@@ -14,7 +16,7 @@ public class GrammarRepresentation implements Variable {
         this.grammar = grammar;
     }
 
-    private TreeMap<String,String> grammar;
+    private TreeMap<String, String> grammar;
 
     public GrammarRepresentation(TreeMap<String, String> grammar) {
         this.grammar = grammar;
