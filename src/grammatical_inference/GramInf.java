@@ -45,7 +45,7 @@ public class GramInf extends AbstractProblem {
         Solution solution = new Solution(1, 4);
         try {
             solution.setVariable(0, new GrammarRepresentation(
-                    grammarForFileInFolder("C:\\Users\\omer_\\Desktop\\gensamples\\positive\\desk\\subset_initpop")
+                    grammarForFileInFolder("C:\\Users\\omer_\\Desktop\\gensamples\\positive\\desk\\terminalOnly\\subset")
             ));
             sampleToInit++;
         } catch (Exception ignored) {
@@ -66,7 +66,7 @@ public class GramInf extends AbstractProblem {
         AtomicInteger passedTruePositiveSamples = new AtomicInteger();
 
         try {
-            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\gensamples\\positive\\desk\\subset_parse\\subdir_5", passedTruePositiveSamples, totalTruePositiveSamples);
+            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\gensamples\\positive\\desk\\terminalOnly\\subset", passedTruePositiveSamples, totalTruePositiveSamples);
         } catch (RecognitionException e) {
             throw new RuntimeException(e);
         }
@@ -80,7 +80,7 @@ public class GramInf extends AbstractProblem {
         AtomicInteger passedTrueNegativeSamples = new AtomicInteger();
 
         try {
-            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\gensamples\\negative\\desk\\wordmutation\\output\\subfolder1", passedTrueNegativeSamples, totalTrueNegativeSamples);
+            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\gensamples\\negative\\desk\\wordmutation\\terminalOnly\\output\\subfolder1", passedTrueNegativeSamples, totalTrueNegativeSamples);
         } catch (RecognitionException e) {
             throw new RuntimeException(e);
         }
@@ -95,7 +95,7 @@ public class GramInf extends AbstractProblem {
             String[] words = r.split(" ");
             totalLength.addAndGet((words.length));
         });
-        double averageLength = ((double) totalLength.get() / grammarMap.size());
+        double averageLength = ( (double) totalLength.get() / grammarMap.size());
         solution.setObjective(2, averageLength);
 
         // Minimise average number of productions
@@ -146,7 +146,7 @@ public class GramInf extends AbstractProblem {
 
         try (Stream<Path> paths = Files.walk(Paths.get(pathName))) {
             paths
-//                    .parallel()
+                    .parallel()
                     .forEach(p -> parseFile(p, g, passedSamples, totalSamples));
         } catch (IOException e) {
             e.printStackTrace();
