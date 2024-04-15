@@ -133,9 +133,10 @@ public class GramInf extends AbstractProblem {
     }
 
 
-    private String treeMapToAntlrString(TreeMap<String, String> map) {
+    private String treeMapToAntlrString(TreeMap<String, String> grammarMap) {
+        TreeMap<String,String> map = new TreeMap<>(grammarMap); // copy so we don't get endless EOFs
         StringBuilder rulesAsString = new StringBuilder("grammar desk;\n");
-
+        map.put("r0", map.get("r0") + " EOF"); // add eof terminal
         map.forEach((name, content) -> rulesAsString.append(name).append(": ").append(content).append(";\n"));
         rulesAsString.append(skipWhitespace);
         return rulesAsString.toString();

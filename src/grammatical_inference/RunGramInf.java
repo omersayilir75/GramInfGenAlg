@@ -16,7 +16,7 @@ public class RunGramInf {
                 .withProperty("populationSize", 398) // seems like 398 = 400 files
                 .withProperty("operator","Graminf_1X_Crossover")
                 .withProblemClass(GramInf.class)
-                .withMaxEvaluations(1000)
+                .withMaxEvaluations(10000)
                 .distributeOnAllCores()
                 .run();
         result.display();
