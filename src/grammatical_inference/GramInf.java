@@ -87,7 +87,7 @@ public class GramInf extends AbstractProblem {
 
         // Minimise ratio passed true positives
         double ratioTrueNegativesPassed = ((double) passedTrueNegativeSamples.get() / (double) totalTrueNegativeSamples.get());
-        solution.setObjective(0, ratioTrueNegativesPassed);
+        solution.setObjective(1, ratioTrueNegativesPassed);
 
         // Minimise average length productions
         AtomicInteger totalLength = new AtomicInteger();
