@@ -1,24 +1,44 @@
 package grammatical_inference;
 
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.ATNSimulator;
+import org.antlr.v4.tool.GrammarParserInterpreter;
+
+import java.util.HashMap;
+import java.util.List;
 
 public class CustomErrorListener extends BaseErrorListener {
     private int syntaxErrors = 0;
+    private CommonToken lastLegalToken;
 
-    //todo also report location of errors for operators where this would be relevant information.
 
     // cut anything we do not need from the syntaxError handler
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
                             String msg, RecognitionException e)  {
+
+        // code for getting the last legal token for the Graminf_mut operator.
+        if (recognizer instanceof GrammarParserInterpreter && syntaxErrors < 1) {
+            GrammarParserInterpreter parser = (GrammarParserInterpreter) recognizer;
+
+            CommonTokenStream tokens = (CommonTokenStream) parser.getTokenStream();
+            List<Token> tokenArrayList = tokens.getTokens();
+            int offendingSymbolIndex = tokenArrayList.indexOf(offendingSymbol);
+            if (offendingSymbolIndex != 0 ) { // not interested in doing this for negative samples
+                lastLegalToken = (CommonToken) tokenArrayList.get(offendingSymbolIndex - 1);
+            }
+        }
         syntaxErrors++;
     }
 
-    public int getSyntaxErrors(){
+    public int getNumberOfSyntaxErrors(){
         return this.syntaxErrors;
     }
+
+    public CommonToken getLastLegalToken() {
+        return this.lastLegalToken;
+    }
+
 }
 
 
