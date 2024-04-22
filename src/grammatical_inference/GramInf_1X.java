@@ -20,6 +20,12 @@ public class GramInf_1X extends OnePointCrossover {
 
 
     @Override
+    public int getArity() {
+        return 3;
+    }
+
+
+    @Override
     public Solution[] evolve(Solution[] parents) {
         Solution result1 = parents[0].copy();
         Solution result2 = parents[1].copy();
@@ -29,16 +35,43 @@ public class GramInf_1X extends OnePointCrossover {
         TreeMap<String, String> grammar1 = repr1.getGrammar();
         TreeMap<String, String> grammar2 = repr2.getGrammar();
 
+        //experiment reducing randomness
+        Comparator<String> lengthComparator = new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                return Integer.compare(s1.length(), s2.length());
+            }
+        };
+
         // pick the rules to crossover
         Random rand = new Random();
         List<String> grammar1Keys = new ArrayList<>(grammar1.keySet());
         String randomRuleKeyGrammar1 = grammar1Keys.get(rand.nextInt(grammar1Keys.size()));
         String ruleParent1 = grammar1.get(randomRuleKeyGrammar1);
 
+//        String ruleParent1 = Collections.max(grammar1.values(), lengthComparator);
+//        String randomRuleKeyGrammar1 = null;
+//        for (Map.Entry<String, String> entry : grammar1.entrySet()) {
+//            if (entry.getValue().equals(ruleParent1)) {
+//                randomRuleKeyGrammar1 = entry.getKey();
+//                break;
+//            }
+//        }
+//
+
 
         List<String> grammar2Keys = new ArrayList<>(grammar2.keySet());
         String randomRuleKeyGrammar2 = grammar2Keys.get(rand.nextInt(grammar2Keys.size()));
         String ruleParent2 = grammar2.get(randomRuleKeyGrammar2);
+
+//        String ruleParent2 = Collections.max(grammar2.values(), lengthComparator);
+//        String randomRuleKeyGrammar2 = null;
+//        for (Map.Entry<String, String> entry : grammar2.entrySet()) {
+//            if (entry.getValue().equals(ruleParent2)) {
+//                randomRuleKeyGrammar2 = entry.getKey();
+//                break;
+//            }
+//        }
 
 
         if (ruleParent1.split(" ").length < ruleParent2.split(" ").length) {
@@ -48,7 +81,7 @@ public class GramInf_1X extends OnePointCrossover {
         }
 
 
-        return new Solution[]{result1, result2};
+        return new Solution[]{result1, result2, result1};
     }
 
     private void crossoverRules(String shorterRule,
