@@ -19,10 +19,10 @@ public class GramInf_1X extends OnePointCrossover {
     // option 2: replace most similar NT
 
 
-    @Override
-    public int getArity() {
-        return 3;
-    }
+//    @Override
+//    public int getArity() {
+//        return 3;
+//    }
 
 
     @Override
@@ -81,7 +81,7 @@ public class GramInf_1X extends OnePointCrossover {
         }
 
 
-        return new Solution[]{result1, result2, result1};
+        return new Solution[]{result1, result2};
     }
 
     private void crossoverRules(String shorterRule,
@@ -127,6 +127,27 @@ public class GramInf_1X extends OnePointCrossover {
             if (part.matches("r\\d+")) {
                 String rule = sourceRuleGrammar.get(part);
                 part = copyWithSubrules(rule, targetRuleGrammar, sourceRuleGrammar);
+            } else if (part.matches("\\(r\\d+\\)\\*|\\(r\\d+\\)\\+|\\(r\\d+\\)\\?")) {
+                // keep track of which operator was present.
+                String operator = null;
+                char[] operators = {'*', '+', '?'};
+                for (char op : operators) {
+                    if (part.contains(Character.toString(op))) {
+                        operator = Character.toString(op);
+                        break;
+                    }
+                }
+                // strip parenthesis and operator first
+                String rule = sourceRuleGrammar.get(part.
+                        replace("(", "").
+                        replace(")", "").
+                        replace("+", "").
+                        replace("*", "").
+                        replace("?",""));
+                // after invoking copyWithSubrules, put the parenthesis and operator back
+                part = copyWithSubrules(rule, targetRuleGrammar, sourceRuleGrammar);
+                // after invoking copyWithSubrules, put the parentheses and operator back
+                part = "(" + part + ")" + operator;
             }
             try {
                 targetRuleParts.set(i, part);
@@ -142,8 +163,29 @@ public class GramInf_1X extends OnePointCrossover {
         for (int i = 0; i < ruleParts.size(); i++) {
             String part = ruleParts.get(i);
             if (part.matches("r\\d+")) {
-                String subRule = sourceGrammar.get(part);
+                String subRule = sourceGrammar.get(part); // get the subrule
                 part = copyWithSubrules(subRule, targetGrammar, sourceGrammar); // part becomes new non-terminal name
+                ruleParts.set(i, part);
+            } else if (part.matches("\\(r\\d+\\)\\*|\\(r\\d+\\)\\+|\\(r\\d+\\)\\?")) {
+                // keep track of which operator was present.
+                String operator = null;
+                char[] operators = {'*', '+', '?'};
+                for (char op : operators) {
+                    if (part.contains(Character.toString(op))) {
+                        operator = Character.toString(op);
+                        break;
+                    }
+                }
+                // get the subrule and strip parentheses and operator first
+                String subRule = sourceGrammar.get(part.
+                        replace("(", "").
+                        replace(")", "").
+                        replace("+", "").
+                        replace("*", "").
+                        replace("?",""));
+                part = copyWithSubrules(subRule, targetGrammar, sourceGrammar);
+                // after invoking copyWithSubrules, put the parentheses and operator back
+                part = "(" + part + ")" + operator;
                 ruleParts.set(i, part);
             }
         }

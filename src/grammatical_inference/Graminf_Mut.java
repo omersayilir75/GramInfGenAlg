@@ -56,7 +56,7 @@ public class Graminf_Mut implements Variation {
 
     @Override
     public int getArity() {
-        return 3;
+        return 1;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class Graminf_Mut implements Variation {
             }
         }
 
-        return new Solution[]{solutions[0].copy(), solutions[1].copy(), solutions[1].copy()};
+        return new Solution[]{solutions[0].copy()};
     }
 
     private void parseSamples(String grammarText, String pathName,
@@ -201,8 +201,6 @@ public class Graminf_Mut implements Variation {
 
                     CommonToken llt = parserListener.getLastLegalToken();
                     walker.walk(listener, t);
-
-                    // todo add llt to nearMisses with all required info...
 
                     nearMisses.put(llt, tokenRules);
 
@@ -349,30 +347,28 @@ public class Graminf_Mut implements Variation {
 
                 int indexSubStringToMutate = findNthOccurrence(ruleParts, ruleName, occurrenceCount);
 
-                //quick safeguard:
-                if (indexSubStringToMutate != -1) {
-                    //add +
-                    String[] rulePartsPlus = ruleParts.clone();
-                    rulePartsPlus[indexSubStringToMutate] = "(" + rulePartsPlus[indexSubStringToMutate] + ")+";
-                    TreeMap<String, String> grammarMapPlus = (TreeMap<String, String>) grammarMap.clone();
-                    grammarMapPlus.put(parentRuleName, String.join(" ", rulePartsPlus));
-                    results.add(grammarMapPlus);
+
+                //add +
+                String[] rulePartsPlus = ruleParts.clone();
+                rulePartsPlus[indexSubStringToMutate] = "(" + rulePartsPlus[indexSubStringToMutate] + ")+";
+                TreeMap<String, String> grammarMapPlus = (TreeMap<String, String>) grammarMap.clone();
+                grammarMapPlus.put(parentRuleName, String.join(" ", rulePartsPlus));
+                results.add(grammarMapPlus);
 
 
-                    //add *
-                    String[] rulePartsStar = ruleParts.clone();
-                    rulePartsStar[indexSubStringToMutate] = "(" + rulePartsStar[indexSubStringToMutate] + ")*";
-                    TreeMap<String, String> grammarMapStar = (TreeMap<String, String>) grammarMap.clone();
-                    grammarMapStar.put(parentRuleName, String.join(" ", rulePartsStar));
-                    results.add(grammarMapStar);
+                //add *
+                String[] rulePartsStar = ruleParts.clone();
+                rulePartsStar[indexSubStringToMutate] = "(" + rulePartsStar[indexSubStringToMutate] + ")*";
+                TreeMap<String, String> grammarMapStar = (TreeMap<String, String>) grammarMap.clone();
+                grammarMapStar.put(parentRuleName, String.join(" ", rulePartsStar));
+                results.add(grammarMapStar);
 
-                    //add ?
-                    String[] rulePartsOpt = ruleParts.clone();
-                    rulePartsOpt[indexSubStringToMutate] = "(" + rulePartsOpt[indexSubStringToMutate] + ")?";
-                    TreeMap<String, String> grammarMapOpt = (TreeMap<String, String>) grammarMap.clone();
-                    grammarMapOpt.put(parentRuleName, String.join(" ", rulePartsOpt));
-                    results.add(grammarMapOpt);
-                }
+                //add ?
+                String[] rulePartsOpt = ruleParts.clone();
+                rulePartsOpt[indexSubStringToMutate] = "(" + rulePartsOpt[indexSubStringToMutate] + ")?";
+                TreeMap<String, String> grammarMapOpt = (TreeMap<String, String>) grammarMap.clone();
+                grammarMapOpt.put(parentRuleName, String.join(" ", rulePartsOpt));
+                results.add(grammarMapOpt);
 
 
                 int a = 5;
@@ -387,15 +383,17 @@ public class Graminf_Mut implements Variation {
 
     private int findNthOccurrence(String[] strArr, String substr, int n) {
         int occurrence = 0;
+        int latestOccurrence = 0;
         for (int i = 0; i < strArr.length; i++) {
             if (strArr[i].equals(substr)) {
                 occurrence++;
                 if (occurrence == n) {
+                    latestOccurrence = i;
                     return i;
                 }
             }
         }
-        return -1;
+        return latestOccurrence;
     }
 
 
