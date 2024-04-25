@@ -79,7 +79,7 @@ public class Graminf_Mut implements Variation {
         HashMap<CommonToken, ArrayList<Triple<?, Pair<Integer, Integer>, Integer>>> nearMisses = new HashMap<>();
 
         String antlrGrammar = GramInf.treeMapToAntlrString(grammar);
-        String path = "C:\\Users\\omer_\\Desktop\\algSamples\\subset\\subset";
+        String path = "C:\\Users\\omer_\\Desktop\\algSamples\\subset\\all";
         try {
             parseSamples(antlrGrammar, path, nearMisses);
         } catch (RecognitionException e) {
@@ -147,7 +147,7 @@ public class Graminf_Mut implements Variation {
                 ParseTree t = p.parse(antlrGrammar.rules.get("r0").index);
 
                 if (parserListener.getNumberOfSyntaxErrors() == 1 && lexerListener.getNumberOfSyntaxErrors() == 0) {
-                    ArrayList<Triple<?, Pair<Integer, Integer>, Integer>> tokenRules = new ArrayList<>(); // todo: also need this in mutate function
+                    ArrayList<Triple<?, Pair<Integer, Integer>, Integer>> tokenRules = new ArrayList<>();
 
                     ParseTreeWalker walker = new ParseTreeWalker();
                     ParseTreeListener listener = new ParseTreeListener() {
@@ -166,9 +166,8 @@ public class Graminf_Mut implements Variation {
                             int ruleIndex = parserRuleContext.getRuleIndex();
                             for (int i = 0; i < parserRuleContext.getChildCount(); i++) {
                                 ParseTree child = parserRuleContext.getChild(i);
-                                if (child instanceof TerminalNode) { // else branch : token, parentruleindex
+                                if (child instanceof TerminalNode) {
                                     Token token = ((TerminalNode) child).getSymbol();
-//                                    tokenRuleMap.put(i + "_" + ruleIndex, new Pair<>(token, ruleIndex)); // key cannot be i, ruleIndex_i maybe better?
 
                                     int parentRuleIndex = -1; // default value, if we're dealing with the root rule
                                     if (parserRuleContext.getParent() != null) {
@@ -203,54 +202,6 @@ public class Graminf_Mut implements Variation {
                     walker.walk(listener, t);
 
                     nearMisses.put(llt, tokenRules);
-
-//
-//                    //todo move out of this function...
-//
-//                    // key = token or rulename, v1 = ruleIndex, v2 = childindex (lower means appears earlier)
-//                    Triple<?, Integer, Integer> ruleIndexLlt = tokenRules
-//                            .stream()
-//                            .filter(tr -> tr.getKey() == llt)
-//                            .findFirst()
-//                            .orElse(null);
-//
-//                    // now: determine what to mutate
-//                    // if v1 == 0: mutate llt in r0
-//                    // if v1 != 0: mutate appropriate non-terminal of parent
-//
-//                    if (ruleIndexLlt != null) {
-//                        if ((Integer) ruleIndexLlt.getValue1() == 0) {
-//                            // look up terminal in r0 and mutate
-//
-//                            Stream<Triple<?, Integer, Integer>> occurrencesTerminalSymbol = tokenRules
-//                                    .stream()
-//                                    .filter(tr -> {
-//                                        if (tr.getKey() instanceof Token) {
-//                                            return ((Token) tr.getKey())
-//                                                    .getText()
-//                                                    .equals(((Token) ruleIndexLlt.getKey()).getText());
-//                                        } else {
-//                                            return false;
-//                                        }
-//                                    });
-//                            List<Triple<?, Integer, Integer>> sortedOccurrences = occurrencesTerminalSymbol
-//                                    .sorted(Comparator.comparing(Triple::getValue2)).toList();
-//
-//
-//                            // find out which occurrence we're dealing with
-//                            int indexOccurrence = sortedOccurrences.indexOf(ruleIndexLlt); // not sure how to use this. this number might be greater than occs in rule...
-//
-//                            //Get rule
-//                            String ruleToMutate = grammarmap.get("r" + ruleIndexLlt.getValue1());
-//
-//                            int a = 5;
-//
-//
-//                        } else {
-//                            // look up non-terminal "r" + ruleIndexLlt.getValue1() in parent rule and mutate
-//                        }
-//
-//                    }
 
 
                 }
@@ -310,14 +261,48 @@ public class Graminf_Mut implements Variation {
 
 
                 // find out which occurrence we're dealing with
-                int indexOccurrence = sortedOccurrences.indexOf(ruleIndexLlt); // not sure how to use this. this number might be greater than occs in rule...
+                int indexOccurrence = sortedOccurrences.indexOf(ruleIndexLlt);
 
                 //Get rule
                 String ruleToMutate = grammarMap.get("r" + ruleIndexLlt.getValue1().getKey());
 
-                int a = 5; //dbg
+                String[] ruleParts = ruleToMutate.split(" ");
+
+                int indexNthOccurrenceInRule = findNthOccurrence(ruleParts,
+                        ((Token) ruleIndexLlt.getKey()).getText(),
+                        indexOccurrence);
+
+                if (indexNthOccurrenceInRule != -1) {
+                    String ruleName = "r" + ruleIndexLlt.getValue1().getKey();
+
+                    //add +
+                    if (!(ruleParts[indexNthOccurrenceInRule].endsWith("*") || ruleParts[indexNthOccurrenceInRule].endsWith("?"))) { // illegal combinations
+                        String[] rulePartsPlus = ruleParts.clone();
+                        rulePartsPlus[indexNthOccurrenceInRule] = "(" + rulePartsPlus[indexNthOccurrenceInRule] + ")+";
+                        TreeMap<String, String> grammarMapPlus = (TreeMap<String, String>) grammarMap.clone();
+                        grammarMapPlus.put(ruleName, String.join(" ", rulePartsPlus));
+                        results.add(grammarMapPlus);
+                    }
 
 
+                    //add *
+                    if (!(ruleParts[indexNthOccurrenceInRule].endsWith("*") || ruleParts[indexNthOccurrenceInRule].endsWith("?"))) {
+                        String[] rulePartsStar = ruleParts.clone();
+                        rulePartsStar[indexNthOccurrenceInRule] = "(" + rulePartsStar[indexNthOccurrenceInRule] + ")*";
+                        TreeMap<String, String> grammarMapStar = (TreeMap<String, String>) grammarMap.clone();
+                        grammarMapStar.put(ruleName, String.join(" ", rulePartsStar));
+                        results.add(grammarMapStar);
+                    }
+
+                    //add ?
+                    String[] rulePartsOpt = ruleParts.clone();
+                    rulePartsOpt[indexNthOccurrenceInRule] = "(" + rulePartsOpt[indexNthOccurrenceInRule] + ")?";
+                    TreeMap<String, String> grammarMapOpt = (TreeMap<String, String>) grammarMap.clone();
+                    grammarMapOpt.put(ruleName, String.join(" ", rulePartsOpt));
+                    results.add(grammarMapOpt);
+
+
+                }
             } else {
                 // look up non-terminal "r" + ruleIndexLlt.getValue1() in parent rule and mutate
                 // parent rule = ruleIndexLlt.value1.value
@@ -348,30 +333,33 @@ public class Graminf_Mut implements Variation {
                 int indexSubStringToMutate = findNthOccurrence(ruleParts, ruleName, occurrenceCount);
 
 
-                //add +
-                String[] rulePartsPlus = ruleParts.clone();
-                rulePartsPlus[indexSubStringToMutate] = "(" + rulePartsPlus[indexSubStringToMutate] + ")+";
-                TreeMap<String, String> grammarMapPlus = (TreeMap<String, String>) grammarMap.clone();
-                grammarMapPlus.put(parentRuleName, String.join(" ", rulePartsPlus));
-                results.add(grammarMapPlus);
+                if (indexSubStringToMutate != -1) {
+                    //add +
+                    if (!(ruleParts[indexSubStringToMutate].endsWith("*") || ruleParts[indexSubStringToMutate].endsWith("?"))) { // illegal combinations
+                        String[] rulePartsPlus = ruleParts.clone();
+                        rulePartsPlus[indexSubStringToMutate] = "(" + rulePartsPlus[indexSubStringToMutate] + ")+";
+                        TreeMap<String, String> grammarMapPlus = (TreeMap<String, String>) grammarMap.clone();
+                        grammarMapPlus.put(parentRuleName, String.join(" ", rulePartsPlus));
+                        results.add(grammarMapPlus);
+                    }
 
+                    //add *
+                    if (!(ruleParts[indexSubStringToMutate].endsWith("*") || ruleParts[indexSubStringToMutate].endsWith("?"))) {
+                        String[] rulePartsStar = ruleParts.clone();
+                        rulePartsStar[indexSubStringToMutate] = "(" + rulePartsStar[indexSubStringToMutate] + ")*";
+                        TreeMap<String, String> grammarMapStar = (TreeMap<String, String>) grammarMap.clone();
+                        grammarMapStar.put(parentRuleName, String.join(" ", rulePartsStar));
+                        results.add(grammarMapStar);
+                    }
 
-                //add *
-                String[] rulePartsStar = ruleParts.clone();
-                rulePartsStar[indexSubStringToMutate] = "(" + rulePartsStar[indexSubStringToMutate] + ")*";
-                TreeMap<String, String> grammarMapStar = (TreeMap<String, String>) grammarMap.clone();
-                grammarMapStar.put(parentRuleName, String.join(" ", rulePartsStar));
-                results.add(grammarMapStar);
+                    //add ?
+                    String[] rulePartsOpt = ruleParts.clone();
+                    rulePartsOpt[indexSubStringToMutate] = "(" + rulePartsOpt[indexSubStringToMutate] + ")?";
+                    TreeMap<String, String> grammarMapOpt = (TreeMap<String, String>) grammarMap.clone();
+                    grammarMapOpt.put(parentRuleName, String.join(" ", rulePartsOpt));
+                    results.add(grammarMapOpt);
 
-                //add ?
-                String[] rulePartsOpt = ruleParts.clone();
-                rulePartsOpt[indexSubStringToMutate] = "(" + rulePartsOpt[indexSubStringToMutate] + ")?";
-                TreeMap<String, String> grammarMapOpt = (TreeMap<String, String>) grammarMap.clone();
-                grammarMapOpt.put(parentRuleName, String.join(" ", rulePartsOpt));
-                results.add(grammarMapOpt);
-
-
-                int a = 5;
+                }
 
             }
 
@@ -383,17 +371,18 @@ public class Graminf_Mut implements Variation {
 
     private int findNthOccurrence(String[] strArr, String substr, int n) {
         int occurrence = 0;
-        int latestOccurrence = 0;
+        int latestOccurrence = -1;
+
         for (int i = 0; i < strArr.length; i++) {
-            if (strArr[i].equals(substr)) {
+            if (strArr[i].contains(substr)) {
                 occurrence++;
+                latestOccurrence = i;
                 if (occurrence == n) {
-                    latestOccurrence = i;
                     return i;
                 }
             }
         }
-        return latestOccurrence;
+        return latestOccurrence; // if we cant match an occurrence, use the latest.
     }
 
 
