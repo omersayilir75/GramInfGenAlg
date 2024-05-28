@@ -39,18 +39,6 @@ files_sourcedir = [os.path.join(sourcedir, file) for file in os.listdir(sourcedi
 
 closest_files = {}
 
-# for i in range(len(files_inputdir)):
-#     distances = []
-#     for j in range(len(files_sourcedir)):
-#         distance = calculate_distance(files_inputdir[i], files_sourcedir[j])
-#         if len(distances) < 50: 
-#             heapq.heappush(distances, (-distance, files_sourcedir[j]))
-#         else:
-#             heapq.heappushpop(distances, (-distance, files_sourcedir[j]))
-#     closest_files[files_sourcedir[i]] = [files_sourcedir for _, files_sourcedir in distances]
-#
-### parellelized below:
-
 def calculate_closest_files(i):
     distances = []
     for j in range(len(files_sourcedir)):

@@ -6,6 +6,7 @@ import grammatical_inference.GrammarRepresentation;
 import org.junit.jupiter.api.Test;
 
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class GramInf_1XTest {
     // mainly for debugging
@@ -19,6 +20,18 @@ class GramInf_1XTest {
         treemap1.put("r2", "c m i p h u p w");
         treemap1.put("r3", "c m i p h u m i p w");
         treemap1.put("r4", "c m i j j 3 p h u p w");
+
+        // Minimise average length productions
+        AtomicInteger totalLength = new AtomicInteger();
+        treemap1.forEach((r, c) -> {
+            String[] words = c.split(" ");
+            for (String w : words) {
+                totalLength.addAndGet(w.length());
+            }
+        });
+        double averageLength = ( (double) totalLength.get() / treemap1.size());
+
+
 
         GrammarRepresentation grammar1 = new GrammarRepresentation(treemap1);
 

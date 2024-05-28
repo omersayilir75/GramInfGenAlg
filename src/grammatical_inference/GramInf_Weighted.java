@@ -1,21 +1,18 @@
 package grammatical_inference;
 
-import net.seninp.gi.logic.GrammarRuleRecord;
 import net.seninp.gi.logic.GrammarRules;
-import net.seninp.gi.repair.NewRepair;
-import net.seninp.gi.repair.RePairGrammar;
 import net.seninp.gi.sequitur.SAXRule;
 import net.seninp.gi.sequitur.SequiturFactory;
 import org.antlr.runtime.RecognitionException;
-import org.antlr.v4.analysis.LeftRecursiveRuleTransformer;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.LexerInterpreter;
 import org.antlr.v4.runtime.atn.ATNDeserializer;
 import org.antlr.v4.runtime.atn.ATNSerializer;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.GrammarParserInterpreter;
-import org.antlr.v4.tool.Rule;
-import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.moeaframework.core.Solution;
 import org.moeaframework.problem.AbstractProblem;
 
@@ -26,20 +23,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static util.GrammarUtils.addToMap;
 
-public class GramInf extends AbstractProblem {
+public class GramInf_Weighted extends AbstractProblem {
     private int sampleToInit = 0;
 
-    public GramInf() {
-        super(1, 5);
+    public GramInf_Weighted() {
+        super(1, 1);
     }
 
     private static final String skipWhitespace = "Whitespace\n" +
@@ -49,7 +43,7 @@ public class GramInf extends AbstractProblem {
 
     @Override
     public Solution newSolution() {
-        Solution solution = new Solution(1, 5);
+        Solution solution = new Solution(1, 1);
         try {
             solution.setVariable(0, new GrammarRepresentation(
                     grammarForFileInFolder("C:\\Users\\omer_\\Desktop\\algSamplesOb\\generated\\subset\\subset")
@@ -80,7 +74,7 @@ public class GramInf extends AbstractProblem {
 
         // Maximise ratio passed true positives
         double ratioTruePositivesPassed = ((double) passedTruePositiveSamples.get() / (double) totalTruePositiveSamples.get());
-        solution.setObjective(0, -ratioTruePositivesPassed);
+//        solution.setObjective(0, -ratioTruePositivesPassed);
 
         //semiParse positive samples
         AtomicInteger semiParsedTotalTruePositiveSamples = new AtomicInteger();
@@ -94,7 +88,7 @@ public class GramInf extends AbstractProblem {
 
         // Maximise ratio passed semi parsed true positives
         double semiParsedRatioTruePositivesPassed = ((double) semiParsedPassedTruePositiveSamples.get() / (double) semiParsedTotalTruePositiveSamples.get());
-        solution.setObjective(1, -semiParsedRatioTruePositivesPassed);
+//        solution.setObjective(1, -semiParsedRatioTruePositivesPassed);
 
 
 
@@ -110,7 +104,7 @@ public class GramInf extends AbstractProblem {
 
         // Minimise ratio passed true positives
         double ratioTrueNegativesPassed = ((double) passedTrueNegativeSamples.get() / (double) totalTrueNegativeSamples.get());
-        solution.setObjective(2, ratioTrueNegativesPassed);
+//        solution.setObjective(2, ratioTrueNegativesPassed);
 
         // Minimise average length productions
         AtomicInteger totalLength = new AtomicInteger();
@@ -118,12 +112,22 @@ public class GramInf extends AbstractProblem {
             String[] words = c.split(" ");
             totalLength.addAndGet((words.length));
         });
-
         double averageLength = ( (double) totalLength.get() / grammarMap.size());
-        solution.setObjective(3, averageLength);
+//        solution.setObjective(3, averageLength);
+
+        double normalised_avg_length = (averageLength - 1)/ 1750;
 
         // Minimise average number of productions
-        solution.setObjective(4, grammarMap.size());
+//        solution.setObjective(4, grammarMap.size());
+
+        double normalised_grammar_size = (grammarMap.size() - 1)/ 1293;
+
+
+        double fitness = 0.5 * ratioTruePositivesPassed + 0.15 * semiParsedRatioTruePositivesPassed +
+                         0.25 * (1 - ratioTrueNegativesPassed) + 0.05 * (1 - normalised_avg_length) +
+                0.05 * (1 - normalised_grammar_size);
+
+        solution.setObjective(0, -fitness);
     }
 
     private TreeMap<String, String> grammarForFileInFolder(String path) throws Exception {

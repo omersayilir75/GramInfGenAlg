@@ -46,32 +46,32 @@ public class GramInf_1X extends OnePointCrossover {
         // pick the rules to crossover
         Random rand = new Random();
         List<String> grammar1Keys = new ArrayList<>(grammar1.keySet());
-        String randomRuleKeyGrammar1 = grammar1Keys.get(rand.nextInt(grammar1Keys.size()));
-        String ruleParent1 = grammar1.get(randomRuleKeyGrammar1);
+//        String randomRuleKeyGrammar1 = grammar1Keys.get(rand.nextInt(grammar1Keys.size()));
+//        String ruleParent1 = grammar1.get(randomRuleKeyGrammar1);
 
-//        String ruleParent1 = Collections.max(grammar1.values(), lengthComparator);
-//        String randomRuleKeyGrammar1 = null;
-//        for (Map.Entry<String, String> entry : grammar1.entrySet()) {
-//            if (entry.getValue().equals(ruleParent1)) {
-//                randomRuleKeyGrammar1 = entry.getKey();
-//                break;
-//            }
-//        }
-//
+        String ruleParent1 = Collections.max(grammar1.values(), lengthComparator);
+        String randomRuleKeyGrammar1 = null;
+        for (Map.Entry<String, String> entry : grammar1.entrySet()) {
+            if (entry.getValue().equals(ruleParent1)) {
+                randomRuleKeyGrammar1 = entry.getKey();
+                break;
+            }
+        }
+
 
 
         List<String> grammar2Keys = new ArrayList<>(grammar2.keySet());
-        String randomRuleKeyGrammar2 = grammar2Keys.get(rand.nextInt(grammar2Keys.size()));
-        String ruleParent2 = grammar2.get(randomRuleKeyGrammar2);
+//        String randomRuleKeyGrammar2 = grammar2Keys.get(rand.nextInt(grammar2Keys.size()));
+//        String ruleParent2 = grammar2.get(randomRuleKeyGrammar2);
 
-//        String ruleParent2 = Collections.max(grammar2.values(), lengthComparator);
-//        String randomRuleKeyGrammar2 = null;
-//        for (Map.Entry<String, String> entry : grammar2.entrySet()) {
-//            if (entry.getValue().equals(ruleParent2)) {
-//                randomRuleKeyGrammar2 = entry.getKey();
-//                break;
-//            }
-//        }
+        String ruleParent2 = Collections.max(grammar2.values(), lengthComparator);
+        String randomRuleKeyGrammar2 = null;
+        for (Map.Entry<String, String> entry : grammar2.entrySet()) {
+            if (entry.getValue().equals(ruleParent2)) {
+                randomRuleKeyGrammar2 = entry.getKey();
+                break;
+            }
+        }
 
 
         if (ruleParent1.split(" ").length < ruleParent2.split(" ").length) {
@@ -127,27 +127,31 @@ public class GramInf_1X extends OnePointCrossover {
             if (part.matches("r\\d+")) {
                 String rule = sourceRuleGrammar.get(part);
                 part = copyWithSubrules(rule, targetRuleGrammar, sourceRuleGrammar);
-            } else if (part.matches("\\(r\\d+\\)\\*|\\(r\\d+\\)\\+|\\(r\\d+\\)\\?")) {
+            } else if (isRuleWithOperators(part)) {
                 // keep track of which operator was present.
-                String operator = null;
-                char[] operators = {'*', '+', '?'};
-                for (char op : operators) {
-                    if (part.contains(Character.toString(op))) {
-                        operator = Character.toString(op);
-                        break;
-                    }
-                }
-                // strip parenthesis and operator first
-                String rule = sourceRuleGrammar.get(part.
+//                String operator = null;
+//                char[] operators = {'*', '+', '?'};
+//                for (char op : operators) {
+//                    if (part.contains(Character.toString(op))) {
+//                        operator = Character.toString(op);
+//                        break;
+//                    }
+//                }
+
+                String partWithoutOperators = part.
                         replace("(", "").
                         replace(")", "").
                         replace("+", "").
                         replace("*", "").
-                        replace("?",""));
+                        replace("?","");
+                // strip parenthesis and operator first
+                String rule = sourceRuleGrammar.get(partWithoutOperators);
                 // after invoking copyWithSubrules, put the parenthesis and operator back
-                part = copyWithSubrules(rule, targetRuleGrammar, sourceRuleGrammar);
+                String newPartName = copyWithSubrules(rule, targetRuleGrammar, sourceRuleGrammar);
                 // after invoking copyWithSubrules, put the parentheses and operator back
-                part = "(" + part + ")" + operator;
+                part = part.replace(partWithoutOperators, newPartName);
+
+
             }
             try {
                 targetRuleParts.set(i, part);
@@ -166,26 +170,21 @@ public class GramInf_1X extends OnePointCrossover {
                 String subRule = sourceGrammar.get(part); // get the subrule
                 part = copyWithSubrules(subRule, targetGrammar, sourceGrammar); // part becomes new non-terminal name
                 ruleParts.set(i, part);
-            } else if (part.matches("\\(r\\d+\\)\\*|\\(r\\d+\\)\\+|\\(r\\d+\\)\\?")) {
-                // keep track of which operator was present.
-                String operator = null;
-                char[] operators = {'*', '+', '?'};
-                for (char op : operators) {
-                    if (part.contains(Character.toString(op))) {
-                        operator = Character.toString(op);
-                        break;
-                    }
-                }
-                // get the subrule and strip parentheses and operator first
-                String subRule = sourceGrammar.get(part.
+            } else if (isRuleWithOperators(part)) {
+                String partWithoutOperators = part.
                         replace("(", "").
                         replace(")", "").
                         replace("+", "").
                         replace("*", "").
-                        replace("?",""));
-                part = copyWithSubrules(subRule, targetGrammar, sourceGrammar);
+                        replace("?","");
+
+
+                // get the subrule
+                String subRule = sourceGrammar.get(partWithoutOperators);
+
+                String newPartName = copyWithSubrules(subRule, targetGrammar, sourceGrammar);
                 // after invoking copyWithSubrules, put the parentheses and operator back
-                part = "(" + part + ")" + operator;
+                part = part.replace(partWithoutOperators, newPartName);
                 ruleParts.set(i, part);
             }
         }
@@ -195,5 +194,21 @@ public class GramInf_1X extends OnePointCrossover {
         targetGrammar.put(modifiedRuleName, modifiedRule); // rename and copy rule provided
         return modifiedRuleName;
     }
+
+    public boolean isRuleWithOperators(String str) {
+        if (str.matches("\\(r\\d+\\)\\*|\\(r\\d+\\)\\+|\\(r\\d+\\)\\?")) {
+            return true;
+        } else {
+            int openIndex = str.indexOf('(');
+            int closeIndex = str.lastIndexOf(')');
+            if (openIndex == -1 || closeIndex == -1 || closeIndex < openIndex) {
+                return false;
+            } else {
+                return isRuleWithOperators(str.substring(openIndex + 1, closeIndex));
+            }
+        }
+    }
+
+
 
 }

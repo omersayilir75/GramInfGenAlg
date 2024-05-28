@@ -7,11 +7,13 @@ public class StandardOperators extends DefaultOperators {
     public StandardOperators() {
         super();
 
-        setMutationHint(GrammarRepresentation.class, "Graminf_1X_Crossover");
-        setMutationHint(GrammarRepresentation.class, "Graminf_Mut");
+        setMutationHint(GrammarRepresentation.class, "GramInf_1X_Crossover");
+        setMutationHint(GrammarRepresentation.class, "GramInf_Mut");
+        setMutationHint(GrammarRepresentation.class, "GramInf_Mut_Repair");
 
 
-        register ("Graminf_1X_Crossover", (properties, problem) -> new GramInf_1X());
-        register ("Graminf_Mut", (properties, problem) -> new Graminf_Mut());
+        register ("GramInf_1X_Crossover", (properties, problem) -> new GramInf_1X());
+        register ("GramInf_Mut", (properties, problem) -> new GramInf_Mut());
+        register ("GramInf_Mut_Repair", (properties, problem) -> new GramInf_Mut_Repair());
     }
 }

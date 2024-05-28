@@ -11,11 +11,23 @@ public class CustomErrorListener extends BaseErrorListener {
     private int syntaxErrors = 0;
     private CommonToken lastLegalToken;
 
+    private int firstError = -1;
+    private int lastError =  -1;
+
 
     // cut anything we do not need from the syntaxError handler
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
                             String msg, RecognitionException e)  {
+        // code for keeping track of substring with lexerrors
+        if (e instanceof LexerNoViableAltException) {
+            LexerNoViableAltException ex = (LexerNoViableAltException) e;
+            if (firstError == -1) {
+                firstError = ex.getStartIndex();
+                lastError = ex.getStartIndex(); // case only one token...
+            }
+            lastError = ex.getStartIndex();
+        }
 
         // code for getting the last legal token for the Graminf_mut operator.
         if (recognizer instanceof GrammarParserInterpreter && syntaxErrors < 1) {
@@ -38,6 +50,10 @@ public class CustomErrorListener extends BaseErrorListener {
     public CommonToken getLastLegalToken() {
         return this.lastLegalToken;
     }
+
+    public int getFirstError() { return this.firstError; }
+
+    public int getLastError() { return this.lastError; }
 
 }
 

@@ -25,10 +25,10 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class Graminf_Mut implements Variation {
+public class GramInf_Mut implements Variation {
     private double probability;
 
-    public Graminf_Mut() {
+    public GramInf_Mut() {
         this(1.0);
     }
 
@@ -38,7 +38,7 @@ public class Graminf_Mut implements Variation {
         return this.probability;
     }
 
-    public Graminf_Mut(double probability) {
+    public GramInf_Mut(double probability) {
         this.setProbability(probability);
     }
 
@@ -61,12 +61,6 @@ public class Graminf_Mut implements Variation {
 
     @Override
     public Solution[] evolve(Solution[] solutions) {
-        // todo impl here
-        // parse pos samples DONE
-        // collect samples that are near misses (1 syntax error) DONE
-        // get position of failure (need to mod the custom error here probably) DONE
-        // mutate around failing point in grammar
-        // try and return a widened and narrowed version of the grammar if they succeed.
 
         Solution sol = solutions[0].copy();
         // get the grammar
@@ -304,8 +298,6 @@ public class Graminf_Mut implements Variation {
 
                 }
             } else {
-                // look up non-terminal "r" + ruleIndexLlt.getValue1() in parent rule and mutate
-                // parent rule = ruleIndexLlt.value1.value
 
                 //Get rule
                 String parentRuleName = "r" + ruleIndexLlt.getValue1().getValue();
