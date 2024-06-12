@@ -4,7 +4,6 @@ import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.spi.OperatorFactory;
 
-
 public class RunGramInf {
 
     public static void main(String[] args) throws Exception {
@@ -174,7 +173,5 @@ public class RunGramInf {
                 .distributeOnAllCores()
                 .run();
         result13.display();
-
-
     }
 }

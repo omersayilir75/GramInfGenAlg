@@ -19,6 +19,7 @@ import org.antlr.v4.tool.ast.GrammarRootAST;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variation;
 import util.Pair;
+import util.ReadProperties;
 import util.Triple;
 
 import java.io.BufferedReader;
@@ -62,7 +63,7 @@ public class GramInf_Mut_Repair implements Variation {
         HashMap<CommonToken, Pair<ArrayList<Triple<?, Pair<Integer, Integer>, Integer>>, TreeMap<String, String>>> nearMisses = new HashMap<>();
 
         String antlrGrammar = GramInf.treeMapToAntlrString(grammar);
-        String path = "C:\\Users\\omer_\\Desktop\\algSamplesOb\\generated\\subset\\subset";
+        String path = ReadProperties.getInstance().getValue("POS_SAMPLES_PATH");
         try {
             parseSamples(antlrGrammar, path, nearMisses);
         } catch (RecognitionException e) {

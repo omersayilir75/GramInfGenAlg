@@ -15,6 +15,7 @@ import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.GrammarParserInterpreter;
 import org.moeaframework.core.Solution;
 import org.moeaframework.problem.AbstractProblem;
+import util.ReadProperties;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,7 +47,7 @@ public class GramInf_Weighted extends AbstractProblem {
         Solution solution = new Solution(1, 1);
         try {
             solution.setVariable(0, new GrammarRepresentation(
-                    grammarForFileInFolder("C:\\Users\\omer_\\Desktop\\algSamplesOb\\generated\\subset\\subset")
+                    grammarForFileInFolder(ReadProperties.getInstance().getValue("POS_SAMPLES_PATH"))
             ));
             sampleToInit++;
         } catch (Exception ignored) {
@@ -67,7 +68,7 @@ public class GramInf_Weighted extends AbstractProblem {
         AtomicInteger passedTruePositiveSamples = new AtomicInteger();
 
         try {
-            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\algSamplesOb\\generated\\subset\\subset", passedTruePositiveSamples, totalTruePositiveSamples);
+            parseSamples(grammar, ReadProperties.getInstance().getValue("POS_SAMPLES_PATH"), passedTruePositiveSamples, totalTruePositiveSamples);
         } catch (RecognitionException e) {
             throw new RuntimeException(e);
         }
@@ -81,7 +82,7 @@ public class GramInf_Weighted extends AbstractProblem {
         AtomicInteger semiParsedPassedTruePositiveSamples = new AtomicInteger();
 
         try {
-            semiParseSamples(grammar, "C:\\Users\\omer_\\Desktop\\algSamplesOb\\generated\\subset\\subset", semiParsedPassedTruePositiveSamples, semiParsedTotalTruePositiveSamples);
+            semiParseSamples(grammar, ReadProperties.getInstance().getValue("POS_SAMPLES_PATH"), semiParsedPassedTruePositiveSamples, semiParsedTotalTruePositiveSamples);
         } catch (RecognitionException e) {
             throw new RuntimeException(e);
         }
@@ -97,7 +98,7 @@ public class GramInf_Weighted extends AbstractProblem {
         AtomicInteger passedTrueNegativeSamples = new AtomicInteger();
 
         try {
-            parseSamples(grammar, "C:\\Users\\omer_\\Desktop\\algSamplesOb\\wordmutation\\output_subset", passedTrueNegativeSamples, totalTrueNegativeSamples);
+            parseSamples(grammar, ReadProperties.getInstance().getValue("NEG_SAMPLES_PATH"), passedTrueNegativeSamples, totalTrueNegativeSamples);
         } catch (RecognitionException e) {
             throw new RuntimeException(e);
         }

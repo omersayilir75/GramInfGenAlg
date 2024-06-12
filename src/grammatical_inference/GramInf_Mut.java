@@ -13,6 +13,7 @@ import org.moeaframework.core.Variation;
 import org.moeaframework.core.configuration.Property;
 import org.moeaframework.core.configuration.Validate;
 import util.Pair;
+import util.ReadProperties;
 import util.Triple;
 
 import java.io.BufferedReader;
@@ -73,7 +74,7 @@ public class GramInf_Mut implements Variation {
         HashMap<CommonToken, ArrayList<Triple<?, Pair<Integer, Integer>, Integer>>> nearMisses = new HashMap<>();
 
         String antlrGrammar = GramInf.treeMapToAntlrString(grammar);
-        String path = "C:\\Users\\omer_\\Desktop\\algSamples\\subset\\all";
+        String path = ReadProperties.getInstance().getValue("POS_SAMPLES_PATH");
         try {
             parseSamples(antlrGrammar, path, nearMisses);
         } catch (RecognitionException e) {
